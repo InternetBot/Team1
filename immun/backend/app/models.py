@@ -12,11 +12,10 @@ class User(db.Model):
     records = db.relationship('ImmunizationRecord', backref='user', lazy=True)
 
     def set_password(self, password):
-        salt = bcrypt.gensalt()
-        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), salt)
+        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     def check_password(self, password):
-        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash)
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
 
 class ImmunizationRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
