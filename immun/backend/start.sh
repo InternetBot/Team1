@@ -1,10 +1,31 @@
 #!/bin/bash
+
 # Wait for the database to be ready
 echo "Waiting for database to be ready..."
-while ! nc -z db 5432; do
-  sleep 0.1
-done
-echo "Database is ready!"
+python -c "
+import time
+import psycopg2
+from psycopg2 import OperationalError
+
+def wait_for_db():
+    while True:
+        try:
+            conn = psycopg2.connect(
+                dbname='immun_db',
+                user='postgres',
+                password='postgres',
+                host='db',
+                port='5432'
+            )
+            conn.close()
+            print('Database is ready!')
+            return
+        except OperationalError:
+            print('Waiting for database...')
+            time.sleep(1)
+
+wait_for_db()
+"
 
 # Initialize the database and create default admin account
 python -c "from app.init_db import init_db; init_db()"
